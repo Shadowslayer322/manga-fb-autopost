@@ -71,7 +71,7 @@ export async function fetchPublishedChaptersForWork(config, work, limit = 10) {
  * Obtiene la imagen del capítulo para el anuncio:
  * - Si el capítulo tiene `announcePage` marcada, usa esa página.
  * - Si no tiene página marcada, usa la página 4 (donde comienza el capítulo).
- * - Si el capítulo tiene menos páginas o falla la consulta, usa la última disponible o la portada.
+ * - Si el capítulo tiene menos de 4 páginas, usa la página 2 (o la 1 / portada si solo tiene 1 página).
  */
 export async function resolveAnnouncementImageUrl(config, chapter, defaultPage = 4) {
   const targetPage = Number(chapter.announcePage) > 0 ? Number(chapter.announcePage) : defaultPage;
@@ -83,15 +83,16 @@ export async function resolveAnnouncementImageUrl(config, chapter, defaultPage =
       return chapter.coverUrl || null;
     }
 
-    const exact = pages.find((p) => Number(p.number) === targetPage);
+    const pickPage = (num) => pages.find((p) => Number(p.number) === num) || pages[num - 1];
+
+    const exact = pickPage(targetPage);
     if (exact?.imageUrl) return exact.imageUrl;
 
-    const byIndex = pages[targetPage - 1];
-    if (byIndex?.imageUrl) return byIndex.imageUrl;
+    // Si tiene menos de 4 páginas, usamos la página 2 (o la primera si solo tiene 1)
+    const secondPage = pickPage(2);
+    if (secondPage?.imageUrl) return secondPage.imageUrl;
 
-    // Si el capítulo tiene menos de 4 páginas, usamos la última disponible
-    const fallbackPage = pages[pages.length - 1];
-    return fallbackPage?.imageUrl || chapter.coverUrl || null;
+    return pages[0]?.imageUrl || chapter.coverUrl || null;
   } catch (err) {
     console.warn(`Aviso: no se pudieron leer las páginas del cap ${chapter.id} (${err.message}). Usando portada.`);
     return chapter.coverUrl || null;
