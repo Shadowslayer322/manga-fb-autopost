@@ -138,6 +138,9 @@ async function main() {
   const toPublish = candidateChapters.slice(0, config.maxPostsPerRun);
   const hasRemaining = candidateChapters.length > toPublish.length;
   console.log(`Capítulos nuevos a procesar en esta corrida: ${toPublish.length} (de ${candidateChapters.length} pendientes)`);
+  if (!config.dryRun) {
+    console.log(`FB config -> pageId: ${config.fbPageId} | tokenLen: ${config.fbPageAccessToken.length} | startsEAA: ${config.fbPageAccessToken.startsWith('EAA')}`);
+  }
 
   let publishedCount = 0;
 
