@@ -2,8 +2,8 @@ name: Autopost Manga Chapters to Facebook
 
 on:
   schedule:
-    # Se ejecuta cada 15 minutos
-    - cron: '*/15 * * * *'
+    # Respaldo cada hora por si algún webhook fallara
+    - cron: '17 * * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -14,6 +14,10 @@ on:
         description: 'Solo registrar capítulos actuales sin publicar (ejecutar la primera vez)'
         type: boolean
         default: false
+
+concurrency:
+  group: autopost-fb
+  cancel-in-progress: false
 
 permissions:
   contents: write
