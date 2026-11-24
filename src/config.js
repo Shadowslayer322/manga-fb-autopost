@@ -8,7 +8,7 @@ export function loadConfig(argv = process.argv.slice(2)) {
     fbPageId: (process.env.FB_PAGE_ID || '').trim(),
     fbPageAccessToken: (process.env.FB_PAGE_ACCESS_TOKEN || '').trim(),
     fbGraphVersion: (process.env.FB_GRAPH_VERSION || 'v21.0').trim(),
-    maxPostsPerRun: Math.max(1, Number.parseInt(process.env.MAX_POSTS_PER_RUN || '5', 10) || 5),
+    maxPostsPerRun: Math.max(1, Number.parseInt(process.env.MAX_POSTS_PER_RUN || '20', 10) || 20),
     dryRun,
     seedOnly,
   };

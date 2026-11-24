@@ -35,6 +35,7 @@ jobs:
           CAPI_API_KEY: ${{ secrets.CAPI_API_KEY }}
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          MAX_POSTS_PER_RUN: '20'
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
           SEED_ONLY: ${{ inputs.seed_only || 'false' }}
         run: node src/index.js

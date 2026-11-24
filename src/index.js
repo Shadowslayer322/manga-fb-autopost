@@ -135,12 +135,14 @@ async function main() {
     return;
   }
 
-  const toPublish = candidateChapters.slice(-config.maxPostsPerRun);
-  console.log(`Capítulos nuevos a procesar en esta corrida: ${toPublish.length}`);
+  const toPublish = candidateChapters.slice(0, config.maxPostsPerRun);
+  const hasRemaining = candidateChapters.length > toPublish.length;
+  console.log(`Capítulos nuevos a procesar en esta corrida: ${toPublish.length} (de ${candidateChapters.length} pendientes)`);
 
   let publishedCount = 0;
 
-  for (const chapter of toPublish) {
+  for (let i = 0; i < toPublish.length; i += 1) {
+    const chapter = toPublish[i];
     chapter.announcementImageUrl = await resolveAnnouncementImageUrl(config, chapter, 4);
     const post = formatPost(chapter);
 
@@ -165,16 +167,23 @@ async function main() {
     }
     publishedCount += 1;
     await saveState(state);
+
+    // Pausa breve entre posts para evitar límites de velocidad de Meta
+    if (i < toPublish.length - 1) {
+      await new Promise((r) => setTimeout(r, 2000));
+    }
   }
 
   if (!config.dryRun) {
-    // Aseguramos guardar el último timestamp de las obras procesadas
-    for (const work of updatedWorks) {
-      if (work.lastChapterAt) {
-        state.workLastChapterAt[String(work.id)] = work.lastChapterAt;
+    // Solo avanzamos el timestamp global de las obras si ya no quedaron capítulos pendientes en cola
+    if (!hasRemaining) {
+      for (const work of updatedWorks) {
+        if (work.lastChapterAt) {
+          state.workLastChapterAt[String(work.id)] = work.lastChapterAt;
+        }
       }
+      await saveState(state);
     }
-    await saveState(state);
     console.log(`Listo. Se publicaron ${publishedCount} capítulos nuevos.`);
   }
 }
