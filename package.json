@@ -1,0 +1,14 @@
+{
+  "name": "manga-fb-autopost",
+  "version": "1.0.0",
+  "description": "Publica automáticamente nuevos capítulos de manga en una Página de Facebook vía Meta Graph API y GitHub Actions",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dry-run": "node --env-file-if-exists=.env src/index.js --dry-run",
+    "seed": "node --env-file-if-exists=.env src/index.js --seed"
+  }
+}

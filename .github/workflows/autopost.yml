@@ -1,0 +1,51 @@
+name: Autopost Manga Chapters to Facebook
+
+on:
+  schedule:
+    # Se ejecuta cada 15 minutos
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Simular sin publicar en Facebook'
+        type: boolean
+        default: false
+      seed_only:
+        description: 'Solo registrar capítulos actuales sin publicar (ejecutar la primera vez)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  autopost:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run autopost script
+        env:
+          CAPI_API_KEY: ${{ secrets.CAPI_API_KEY }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          SEED_ONLY: ${{ inputs.seed_only || 'false' }}
+        run: node src/index.js
+
+      - name: Save published chapters state
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          if ! git diff --quiet state/published.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add state/published.json
+            git commit -m "chore: update published chapters"
+            git push
+          fi
